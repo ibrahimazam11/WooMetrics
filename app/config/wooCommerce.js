@@ -51,3 +51,11 @@ exports.test1 = async (req, res) => {
     console.log(result);
     res.send(result)
 }
+
+exports.returnPage = async (req, res) => {
+    res.send("return page")
+}
+
+exports.callbackEndpoint = async (req, res) => {
+    res.send("callback url")
+}
