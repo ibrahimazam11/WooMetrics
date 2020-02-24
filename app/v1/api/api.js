@@ -11,6 +11,6 @@ apiRoutes.post('/user/register', UserController.register);
 apiRoutes.post('/user/login', UserController.login);
 apiRoutes.get('/user/logout', auth, UserController.logout);
 
-apiRoutes.get('/test', WooCommerceController.test)
+apiRoutes.get('/test', WooCommerceController.test1)
 
 module.exports = apiRoutes

@@ -26,9 +26,26 @@ exports.test = async (req, res) => {
             // console.log("Response Status:", error.response.status);
             // console.log("Response Headers:", error.response.headers);
             // console.log("Response Data:", error.response.data);
-            res.status(400).json({error})
+            res.status(400).json({ error })
         })
         .finally(() => {
             // Always executed.
         });
+}
+
+exports.test1 = async (req, res) => {
+    const querystring = require('querystring');
+
+    const store_url = 'https://bamushop.com/';
+    const endpoint = '/wc-auth/v1/authorize';
+    const params = {
+        app_name: 'WooMetrics',
+        scope: 'read_write',
+        user_id: 1234,
+        return_url: 'https://woometrics-backend.herokuapp.com/api/v1/return-page',
+        callback_url: 'https://woometrics-backend.herokuapp.com/api/v1/callback-endpoint'
+    };
+    const query_string = querystring.stringify(params).replace(/%20/g, '+');
+
+    console.log(store_url + endpoint + '?' + query_string);
 }
