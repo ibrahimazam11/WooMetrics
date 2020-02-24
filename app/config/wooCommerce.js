@@ -47,7 +47,7 @@ exports.permission = async (req, res) => {
             const params = {
                 app_name: process.env.APP_NAME,
                 scope: 'read_write',
-                user_id: req.user._id,
+                user_id: req.user._id.toString(),
                 return_url: process.env.RETURN_URL,
                 callback_url: process.env.WOOMETRICS_URL + '/v1/wooCommerce/callback-endpoint'
             };
