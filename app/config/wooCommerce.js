@@ -47,5 +47,7 @@ exports.test1 = async (req, res) => {
     };
     const query_string = querystring.stringify(params).replace(/%20/g, '+');
 
-    console.log(store_url + endpoint + '?' + query_string);
+    const result = store_url + endpoint + '?' + query_string
+    console.log(result);
+    res.send(result)
 }
