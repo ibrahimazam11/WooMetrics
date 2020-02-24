@@ -11,9 +11,8 @@ apiRoutes.post('/user/register', UserController.register);
 apiRoutes.post('/user/login', UserController.login);
 apiRoutes.get('/user/logout', auth, UserController.logout);
 
-apiRoutes.get('/test', WooCommerceController.test1)
-apiRoutes.get('/return-page', WooCommerceController.returnPage)
-apiRoutes.post('/callback-endpoint', WooCommerceController.callbackEndpoint)
+apiRoutes.get('/wooCommerce/requestPermission', auth, WooCommerceController.permission)
+apiRoutes.post('/wooCommerce/callback-endpoint', WooCommerceController.callbackEndpoint)
 
 
 module.exports = apiRoutes

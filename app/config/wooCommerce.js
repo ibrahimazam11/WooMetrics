@@ -1,4 +1,6 @@
 const WooCommerceRestApi = require('@woocommerce/woocommerce-rest-api').default;
+const querystring = require('querystring');
+const User = require('../models/user');
 
 exports.test = async (req, res) => {
     const WooCommerce = new WooCommerceRestApi({
@@ -33,31 +35,33 @@ exports.test = async (req, res) => {
         });
 }
 
-exports.test1 = async (req, res) => {
-    const querystring = require('querystring');
+exports.permission = async (req, res) => {
+    try {
+        let { StoreName, storeUrl } = req.body;
 
-    const store_url = 'https://bamushop.com/';
-    const endpoint = '/wc-auth/v1/authorize';
-    const params = {
-        app_name: 'WooMetrics',
-        scope: 'read_write',
-        user_id: 1234,
-        return_url: 'https://woometrics-backend.herokuapp.com/api/v1/return-page',
-        callback_url: 'https://woometrics-backend.herokuapp.com/api/v1/callback-endpoint'
-    };
-    const query_string = querystring.stringify(params).replace(/%20/g, '+');
+        if (storeUrl) {
+            await User.findByIdAndUpdate(req.user._id, { store: { name: StoreName, url: storeUrl } }, { new: true })
 
-    const result = store_url + endpoint + '?' + query_string
-    console.log(result);
-    res.send(result)
-}
+            const store_url = storeUrl;
+            const endpoint = process.env.WOOCOMMERCE_AUTH_ENDPOINT;
+            const params = {
+                app_name: process.env.APP_NAME,
+                scope: 'read_write',
+                user_id: req.user._id,
+                return_url: process.env.RETURN_URL,
+                callback_url: process.env.WOOMETRICS_URL + '/v1/wooCommerce/callback-endpoint'
+            };
+            const query_string = querystring.stringify(params).replace(/%20/g, '+');
+            const result = store_url + endpoint + '?' + query_string
 
-exports.returnPage = async (req, res) => {
-    res.send("return page")
+            return res.redirect(result)
+        }
+    } catch (error) {
+        res.status(400).json(error.message)
+    }
 }
 
 exports.callbackEndpoint = async (req, res) => {
-    console.log(req)
-    console.log(req.consumer_key)
-    res.send("callback url")
+    await User.findByIdAndUpdate(req.body.user_id, { wooCommerceApiKeys: req.body })
+    res.send("OK")
 }

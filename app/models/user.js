@@ -30,6 +30,19 @@ const userSchema = mongoose.Schema({
     },
     token: {
         type: String
+    },
+    store: {
+        name: String,
+        url: String
+    },
+    wooCommerceApiKeys: {
+        key_id: Number,
+        consumer_key: String,
+        consumer_secret: String,
+        key_permissions: {
+            type: String,
+            enum: ['read', 'write', 'read_write']
+        }
     }
 })
 
