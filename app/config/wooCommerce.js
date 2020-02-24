@@ -57,5 +57,7 @@ exports.returnPage = async (req, res) => {
 }
 
 exports.callbackEndpoint = async (req, res) => {
+    console.log(req)
+    console.log(req.consumer_key)
     res.send("callback url")
 }
