@@ -1,13 +1,13 @@
 const express = require('express')
 const apiRoutes = express.Router()
-
-const UserController = require('../controllers/users');
-const OrderController = require('../controllers/orders');
-const CustomerController = require('../controllers/customers');
 const { auth } = require('../middleware/auth');
 const { admin } = require('../middleware/admin');
 const { wcPermission } = require('../middleware/wcPermission');
 const WooCommerceController = require('../../config/wooCommerce');
+const ProductController = require('../controllers/products');
+const UserController = require('../controllers/users');
+const OrderController = require('../controllers/orders');
+const CustomerController = require('../controllers/customers');
 
 
 /****
@@ -29,8 +29,12 @@ apiRoutes.get('/wc/order/all', auth, wcPermission, OrderController.getAll)
 apiRoutes.get('/wc/order/:orderId/refunds', auth, wcPermission, OrderController.refunds)
 apiRoutes.get('/wc/order/:orderId/notes', auth, wcPermission, OrderController.notes)
 apiRoutes.post('/wc/order/:orderId/note', auth, wcPermission, OrderController.addNote)
+apiRoutes.get('/wc/order/segment', auth, wcPermission, OrderController.segments)
 
 /**** Customers ****/
 apiRoutes.get('/wc/customer/all', auth, wcPermission, CustomerController.getAll)
+
+/**** Products ****/
+apiRoutes.get('/wc/product/all', auth, wcPermission, ProductController.getAll)
 
 module.exports = apiRoutes
