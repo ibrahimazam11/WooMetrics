@@ -44,15 +44,15 @@ exports.addNote = async (req, res) => {
 
 exports.segments = async (req, res) => {
     try {
-
+        let perPage = 10
 
         async.parallel([
             async () => {       //  successfull orders
-                let response = await req.WooCommerce.get(`orders?per_page=100&status=completed`)
+                let response = await req.WooCommerce.get(`orders?per_page=${perPage}&status=completed`)
                 response = wcReturn(response)
                 if (response.pages > 1) {
                     for (let x = 2; x <= response.pages; x++) {
-                        let newResponse = await req.WooCommerce.get(`orders?page=${x}&per_page=100&status=completed`)
+                        let newResponse = await req.WooCommerce.get(`orders?page=${x}&per_page=${perPage}&status=completed`)
                         newResponse = wcReturn(newResponse)
                         response.data = response.data.concat(newResponse.data)
                     }
@@ -75,11 +75,11 @@ exports.segments = async (req, res) => {
                 return successfull
             },
             async () => {   //  failed orders
-                let response = await req.WooCommerce.get(`orders?per_page=100&status=failed`)
+                let response = await req.WooCommerce.get(`orders?per_page=${perPage}&status=failed`)
                 response = wcReturn(response)
                 if (response.pages > 1) {
                     for (let x = 2; x <= response.pages; x++) {
-                        let newResponse = await req.WooCommerce.get(`orders?page=${x}&per_page=100&status=failed`)
+                        let newResponse = await req.WooCommerce.get(`orders?page=${x}&per_page=${perPage}&status=failed`)
                         newResponse = wcReturn(newResponse)
                         response.data = response.data.concat(newResponse.data)
                     }
@@ -101,18 +101,93 @@ exports.segments = async (req, res) => {
                 failed.AOI = Math.round(((failed.totalItems / failed.orders) + Number.EPSILON) * 100) / 100;
                 return failed
             },
-            // async function (cb) {
+            async function (cb) {   //customer orders
+                let response = await req.WooCommerce.get(`orders?per_page=${perPage}`)
+                response = wcReturn(response)
+                if (response.pages > 1) {
+                    for (let x = 2; x <= response.pages; x++) {
+                        let newResponse = await req.WooCommerce.get(`orders?page=${x}&per_page=${perPage}`)
+                        newResponse = wcReturn(newResponse)
+                        response.data = response.data.concat(newResponse.data)
+                    }
+                }
+                response.data = response.data.filter(resp => resp.customer_id != 0)
+                response.item = response.data.length
+                response.pages = Math.ceil(response.data.length / 100)
+                let customer = {
+                    name: 'Customer Orders',
+                    orders: response.data.length,
+                    grossSales: 0,
+                    totalItems: 0,
+                    AOV: 0,
+                    AOI: 0
+                }
+                for (let resp of response.data) {
+                    customer.grossSales = customer.grossSales + +resp.total
+                    customer.totalItems = customer.totalItems + +resp.line_items.length
+                }
+                customer.grossSales = Math.round(((customer.grossSales) + Number.EPSILON) * 100) / 100
+                customer.AOV = Math.round(((customer.grossSales / customer.orders) + Number.EPSILON) * 100) / 100;
+                customer.AOI = Math.round(((customer.totalItems / customer.orders) + Number.EPSILON) * 100) / 100;
+                return customer
+            },
+            async function (cb) {
+                let response = await req.WooCommerce.get(`orders?per_page=${perPage}&customer=0`)
+                response = wcReturn(response)
+                if (response.pages > 1) {
+                    for (let x = 2; x <= response.pages; x++) {
+                        let newResponse = await req.WooCommerce.get(`orders?page=${x}&per_page=${perPage}&customer=0`)
+                        newResponse = wcReturn(newResponse)
+                        response.data = response.data.concat(newResponse.data)
+                    }
+                }
+                let guest = {
+                    name: 'Guest Orders',
+                    orders: response.data.length,
+                    grossSales: 0,
+                    totalItems: 0,
+                    AOV: 0,
+                    AOI: 0
+                }
+                for (let resp of response.data) {
+                    guest.grossSales = guest.grossSales + +resp.total
+                    guest.totalItems = guest.totalItems + +resp.line_items.length
+                }
+                guest.grossSales = Math.round(((guest.grossSales) + Number.EPSILON) * 100) / 100
+                guest.AOV = Math.round(((guest.grossSales / guest.orders) + Number.EPSILON) * 100) / 100;
+                guest.AOI = Math.round(((guest.totalItems / guest.orders) + Number.EPSILON) * 100) / 100;
+                return guest
+            },
+            // async function (cb) {    // EU orders
 
             // },
-            // async function (cb) {
-
-            // },
-            // async function (cb) {
-
-            // },
-            // async function (cb) {
-
-            // }
+            async function (cb) {   // all orders
+                let response = await req.WooCommerce.get(`orders?per_page=${perPage}`)
+                response = wcReturn(response)
+                if (response.pages > 1) {
+                    for (let x = 2; x <= response.pages; x++) {
+                        let newResponse = await req.WooCommerce.get(`orders?page=${x}&per_page=${perPage}`)
+                        newResponse = wcReturn(newResponse)
+                        response.data = response.data.concat(newResponse.data)
+                    }
+                }
+                let all = {
+                    name: 'All Orders',
+                    orders: response.data.length,
+                    grossSales: 0,
+                    totalItems: 0,
+                    AOV: 0,
+                    AOI: 0
+                }
+                for (let resp of response.data) {
+                    all.grossSales = all.grossSales + +resp.total
+                    all.totalItems = all.totalItems + +resp.line_items.length
+                }
+                all.grossSales = Math.round(((all.grossSales) + Number.EPSILON) * 100) / 100
+                all.AOV = Math.round(((all.grossSales / all.orders) + Number.EPSILON) * 100) / 100;
+                all.AOI = Math.round(((all.totalItems / all.orders) + Number.EPSILON) * 100) / 100;
+                return all
+            }
         ],
             (err, result) => {
                 if (err) throw err
