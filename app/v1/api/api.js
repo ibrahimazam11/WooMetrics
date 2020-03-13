@@ -30,11 +30,13 @@ apiRoutes.get('/wc/order/:orderId/refunds', auth, wcPermission, OrderController.
 apiRoutes.get('/wc/order/:orderId/notes', auth, wcPermission, OrderController.notes)
 apiRoutes.post('/wc/order/:orderId/note', auth, wcPermission, OrderController.addNote)
 apiRoutes.get('/wc/order/segment', auth, wcPermission, OrderController.segments)
+apiRoutes.get('/wc/order/customer', auth, wcPermission, OrderController.getCustomerOrders)
 
 /**** Customers ****/
 apiRoutes.get('/wc/customer/all', auth, wcPermission, CustomerController.getAll)
 
 /**** Products ****/
 apiRoutes.get('/wc/product/all', auth, wcPermission, ProductController.getAll)
+apiRoutes.get('/wc/product/variations', auth, wcPermission, ProductController.getAllVariations)
 
 module.exports = apiRoutes

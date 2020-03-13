@@ -112,7 +112,7 @@ exports.segments = async (req, res) => {
                     }
                 }
                 response.data = response.data.filter(resp => resp.customer_id != 0)
-                response.item = response.data.length
+                response.items = response.data.length
                 response.pages = Math.ceil(response.data.length / 100)
                 let customer = {
                     name: 'Customer Orders',
@@ -195,6 +195,28 @@ exports.segments = async (req, res) => {
             })
     } catch (error) {
         console.error(error)
+        res.status(400).json(error.response.data)
+    }
+}
+
+exports.getCustomerOrders = async (req, res) => {
+    try {
+        let perPage = 10
+        const query = QueryString.stringify(req.query).replace(/%20/g, '+');
+        let response = await req.WooCommerce.get(`orders?per_page=${perPage}&${query}`)
+        response = wcReturn(response)
+        if (response.pages > 1) {
+            for (let x = 2; x <= response.pages; x++) {
+                let newResponse = await req.WooCommerce.get(`orders?page=${x}&per_page=${perPage}&${query}`)
+                newResponse = wcReturn(newResponse)
+                response.data = response.data.concat(newResponse.data)
+            }
+        }
+        response.data = response.data.filter(resp => resp.customer_id != 0)
+        response.items = response.data.length
+        response.pages = Math.ceil(response.data.length / perPage)
+        return res.send(response)
+    } catch (error) {
         res.status(400).json(error.response.data)
     }
 }
